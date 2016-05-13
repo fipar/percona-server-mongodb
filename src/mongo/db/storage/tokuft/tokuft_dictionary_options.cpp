@@ -98,9 +98,10 @@ namespace mongo {
             if (compression != "zlib" &&
                 compression != "quicklz" &&
                 compression != "lzma" &&
+		compression != "snappy" &&
                 compression != "none") {
                 StringBuilder sb;
-                sb << optionName("compression") << " must be one of \"zlib\", \"quicklz\", \"lzma\", or \"none\", but attempted to set to: "
+                sb << optionName("compression") << " must be one of \"zlib\", \"quicklz\", \"lzma\", \"snappy\" or \"none\", but attempted to set to: "
                    << compression;
                 return Status(ErrorCodes::BadValue, sb.str());
             }
@@ -213,6 +214,8 @@ namespace mongo {
             return TOKU_LZMA_METHOD;
         } else if (compression == "none") {
             return TOKU_NO_COMPRESSION;
+	} else if (compression == "snappy") {
+	    return TOKU_SNAPPY_METHOD;
         } else {
             invariant(false);
         }
