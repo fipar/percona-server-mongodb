@@ -52,9 +52,9 @@
 namespace mongo {
 
 namespace {
-class WiredTigerFactory : public StorageEngine::Factory {
+class InMemoryStorageEngineFactory : public StorageEngine::Factory {
 public:
-    virtual ~WiredTigerFactory() {}
+  //    virtual ~InMemoryFactory() {}
     virtual StorageEngine* create(const StorageGlobalParams& params,
                                   const StorageEngineLockFile* lockFile) const {
         if (lockFile && lockFile->createdByUncleanShutdown()) {
@@ -75,12 +75,12 @@ public:
                     cacheSizeGB = 1;
             }
         }
-        const bool ephemeral = false;
-        WiredTigerKVEngine* kv = new WiredTigerKVEngine(getCanonicalName().toString(),
+        const bool ephemeral = true;
+        WiredTigerKVEngine* kv = new WiredTigerKVEngine("inMemory",
                                                         params.dbpath,
                                                         wiredTigerGlobalOptions.engineConfig,
                                                         cacheSizeGB,
-                                                        params.dur,
+                                                        false,
                                                         ephemeral,
                                                         params.repair,
                                                         params.readOnly);
@@ -98,7 +98,7 @@ public:
     }
 
     virtual StringData getCanonicalName() const {
-        return kWiredTigerEngineName;
+        return "inMemory";
     }
 
     virtual Status validateCollectionStorageOptions(const BSONObj& options) const {
@@ -111,26 +111,11 @@ public:
 
     virtual Status validateMetadata(const StorageEngineMetadata& metadata,
                                     const StorageGlobalParams& params) const {
-        Status status =
-            metadata.validateStorageEngineOption("directoryPerDB", params.directoryperdb);
-        if (!status.isOK()) {
-            return status;
-        }
-
-        status = metadata.validateStorageEngineOption("directoryForIndexes",
-                                                      wiredTigerGlobalOptions.directoryForIndexes);
-        if (!status.isOK()) {
-            return status;
-        }
-
         return Status::OK();
     }
 
     virtual BSONObj createMetadataOptions(const StorageGlobalParams& params) const {
-        BSONObjBuilder builder;
-        builder.appendBool("directoryPerDB", params.directoryperdb);
-        builder.appendBool("directoryForIndexes", wiredTigerGlobalOptions.directoryForIndexes);
-        return builder.obj();
+        return BSONObj();
     }
 
     bool supportsReadOnly() const final {
@@ -139,11 +124,11 @@ public:
 };
 }  // namespace
 
-MONGO_INITIALIZER_WITH_PREREQUISITES(WiredTigerEngineInit, ("SetGlobalEnvironment"))
+MONGO_INITIALIZER_WITH_PREREQUISITES(InMemoryEngineInit, ("SetGlobalEnvironment"))
 (InitializerContext* context) {
-  
-    getGlobalServiceContext()->registerStorageEngine(kWiredTigerEngineName,
-                                                     new WiredTigerFactory());
+
+    getGlobalServiceContext()->registerStorageEngine("inMemory",
+                                                     new InMemoryStorageEngineFactory());
 
     return Status::OK();
 }

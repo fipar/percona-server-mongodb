@@ -1,0 +1,86 @@
+Import("env")
+Import("wiredtiger")
+
+env.Library(
+    target='storage_inmemory_customization_hooks',
+    source= ['inmemory_customization_hooks.cpp'],
+    LIBDEPS= ['$BUILD_DIR/mongo/base',
+              '$BUILD_DIR/mongo/db/service_context'],
+    PROGDEPS_DEPENDENTS=[
+        '$BUILD_DIR/mongo/mongod',
+        '$BUILD_DIR/mongo/mongos',
+    ],
+)
+
+
+if wiredtiger:
+    wtEnv = env.Clone()
+    wtEnv.InjectThirdPartyIncludePaths(libraries=['wiredtiger'])
+    wtEnv.InjectThirdPartyIncludePaths(libraries=['zlib'])
+    wtEnv.InjectThirdPartyIncludePaths(libraries=['valgrind'])
+
+    # This is the smallest possible set of files that wraps WT
+    wtEnv.Library(
+        target='storage_inmemory_core',
+        source= [
+            '../wiredtiger/wiredtiger_global_options.cpp',
+            '../wiredtiger/wiredtiger_index.cpp',
+            '../wiredtiger/wiredtiger_kv_engine.cpp',
+            '../wiredtiger/wiredtiger_record_store.cpp',
+            '../wiredtiger/wiredtiger_recovery_unit.cpp',
+            '../wiredtiger/wiredtiger_session_cache.cpp',
+            '../wiredtiger/wiredtiger_snapshot_manager.cpp',
+            '../wiredtiger/wiredtiger_size_storer.cpp',
+            '../wiredtiger/wiredtiger_util.cpp',
+            ],
+        LIBDEPS= [
+            'storage_inmemory_customization_hooks',
+            '$BUILD_DIR/mongo/base',
+            '$BUILD_DIR/mongo/db/namespace_string',
+            '$BUILD_DIR/mongo/db/catalog/collection_options',
+            '$BUILD_DIR/mongo/db/concurrency/lock_manager',
+            '$BUILD_DIR/mongo/db/concurrency/write_conflict_exception',
+            '$BUILD_DIR/mongo/db/index/index_descriptor',
+            '$BUILD_DIR/mongo/db/service_context',
+            '$BUILD_DIR/mongo/db/storage/index_entry_comparison',
+            '$BUILD_DIR/mongo/db/storage/journal_listener',
+            '$BUILD_DIR/mongo/db/storage/key_string',
+            '$BUILD_DIR/mongo/db/storage/oplog_hack',
+            '$BUILD_DIR/mongo/db/storage/storage_options',
+            '$BUILD_DIR/mongo/util/concurrency/ticketholder',
+            '$BUILD_DIR/mongo/util/elapsed_tracker',
+            '$BUILD_DIR/mongo/util/foundation',
+            '$BUILD_DIR/mongo/util/processinfo',
+            '$BUILD_DIR/third_party/shim_wiredtiger',
+            '$BUILD_DIR/third_party/shim_snappy',
+            '$BUILD_DIR/third_party/shim_zlib',
+            ],
+        LIBDEPS_TAGS=[
+            # References WiredTigerKVEngine::initRsOplogBackgroundThread which does not have
+            # a unique definition.
+            'incomplete',
+        ],
+        )
+
+    wtEnv.Library(
+        target='storage_inmemory',
+        source=[
+            'inmemory_init.cpp',
+            '../wiredtiger/wiredtiger_options_init.cpp',
+            '../wiredtiger/wiredtiger_parameters.cpp',
+            '../wiredtiger/wiredtiger_record_store_mongod.cpp',
+            '../wiredtiger/wiredtiger_server_status.cpp',
+            ],
+        LIBDEPS=['storage_inmemory_core',
+                 'storage_inmemory_customization_hooks',
+                 '$BUILD_DIR/mongo/db/storage/kv/kv_engine',
+                 '$BUILD_DIR/mongo/db/storage/storage_engine_lock_file',
+                 '$BUILD_DIR/mongo/db/storage/storage_engine_metadata',
+                 ],
+        LIBDEPS_TAGS=[
+            # Depends on symbols defined in serverOnlyfiles
+            'incomplete',
+        ],
+        )
+
+    

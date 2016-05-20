@@ -725,6 +725,9 @@ serveronlyLibdeps = [
     "update_index_data",
 ]
 
+serveronlyLibdeps.append('storage/inmemory/storage_inmemory')    
+    
+    
 if wiredtiger:
     serveronlyLibdeps.append('storage/wiredtiger/storage_wiredtiger')
     serveronlyLibdeps.append('$BUILD_DIR/third_party/shim_wiredtiger')

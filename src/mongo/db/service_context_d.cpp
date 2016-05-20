@@ -149,8 +149,9 @@ void ServiceContextMongoD::initializeGlobalStorageEngine() {
                 isRegisteredStorageEngine(storageGlobalParams.engine));
     }
 
+    
     const StorageEngine::Factory* factory = _storageFactories[storageGlobalParams.engine];
-
+   
     uassert(18656,
             str::stream() << "Cannot start server with an unknown storage engine: "
                           << storageGlobalParams.engine,
@@ -215,6 +216,7 @@ void ServiceContextMongoD::shutdownGlobalStorageEngineCleanly() {
 
 void ServiceContextMongoD::registerStorageEngine(const std::string& name,
                                                  const StorageEngine::Factory* factory) {
+  log() << "registerStorageEngine: " << name << "\n";
     // No double-registering.
     invariant(0 == _storageFactories.count(name));
 
