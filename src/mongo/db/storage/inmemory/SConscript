@@ -14,23 +14,23 @@ env.Library(
 
 
 if wiredtiger:
-    wtEnv = env.Clone()
-    wtEnv.InjectThirdPartyIncludePaths(libraries=['wiredtiger'])
-    wtEnv.InjectThirdPartyIncludePaths(libraries=['zlib'])
-    wtEnv.InjectThirdPartyIncludePaths(libraries=['valgrind'])
+    imEnv = env.Clone()
+    imEnv.InjectThirdPartyIncludePaths(libraries=['wiredtiger'])
+    imEnv.InjectThirdPartyIncludePaths(libraries=['zlib'])
+    imEnv.InjectThirdPartyIncludePaths(libraries=['valgrind'])
 
     # This is the smallest possible set of files that wraps WT
-    wtEnv.Library(
+    imEnv.Library(
         target='storage_inmemory_core',
         source= [
             '../wiredtiger/wiredtiger_global_options.cpp',
             '../wiredtiger/wiredtiger_index.cpp',
             '../wiredtiger/wiredtiger_kv_engine.cpp',
-            '../wiredtiger/wiredtiger_record_store.cpp',
-            '../wiredtiger/wiredtiger_recovery_unit.cpp',
+#            '../wiredtiger/wiredtiger_record_store.cpp',
+#            '../wiredtiger/wiredtiger_recovery_unit.cpp',
             '../wiredtiger/wiredtiger_session_cache.cpp',
             '../wiredtiger/wiredtiger_snapshot_manager.cpp',
-            '../wiredtiger/wiredtiger_size_storer.cpp',
+#            '../wiredtiger/wiredtiger_size_storer.cpp',
             '../wiredtiger/wiredtiger_util.cpp',
             ],
         LIBDEPS= [
@@ -62,14 +62,14 @@ if wiredtiger:
         ],
         )
 
-    wtEnv.Library(
+    imEnv.Library(
         target='storage_inmemory',
         source=[
             'inmemory_init.cpp',
             '../wiredtiger/wiredtiger_options_init.cpp',
             '../wiredtiger/wiredtiger_parameters.cpp',
-            '../wiredtiger/wiredtiger_record_store_mongod.cpp',
-            '../wiredtiger/wiredtiger_server_status.cpp',
+#            '../wiredtiger/wiredtiger_record_store_mongod.cpp',
+#            '../wiredtiger/wiredtiger_server_status.cpp',
             ],
         LIBDEPS=['storage_inmemory_core',
                  'storage_inmemory_customization_hooks',

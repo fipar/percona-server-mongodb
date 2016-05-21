@@ -75,16 +75,16 @@ public:
                     cacheSizeGB = 1;
             }
         }
-        const bool ephemeral = true;
+	log() << "initializing WiredTiger as inMemory engine, engine config = " << wiredTigerGlobalOptions.engineConfig << "\n";
         WiredTigerKVEngine* kv = new WiredTigerKVEngine("inMemory",
                                                         params.dbpath,
-                                                        wiredTigerGlobalOptions.engineConfig,
+                                                        "in_memory=1,checkpoint=(wait=0,log_size=0)", 
                                                         cacheSizeGB,
-                                                        false,
-                                                        ephemeral,
+                                                        false, // durable
+                                                        true, // ephemeral
                                                         params.repair,
                                                         params.readOnly);
-        kv->setRecordStoreExtraOptions(wiredTigerGlobalOptions.collectionConfig);
+        //kv->setRecordStoreExtraOptions(wiredTigerGlobalOptions.collectionConfig);
         kv->setSortedDataInterfaceExtraOptions(wiredTigerGlobalOptions.indexConfig);
         // Intentionally leaked.
         new WiredTigerServerStatusSection(kv);
