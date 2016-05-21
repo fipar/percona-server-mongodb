@@ -91,9 +91,9 @@ public:
         new WiredTigerEngineRuntimeConfigParameter(kv);
 
         KVStorageEngineOptions options;
-        options.directoryPerDB = params.directoryperdb;
-        options.directoryForIndexes = wiredTigerGlobalOptions.directoryForIndexes;
-        options.forRepair = params.repair;
+        options.directoryPerDB = false; 
+        options.directoryForIndexes = false; 
+        options.forRepair = false; 
         return new KVStorageEngine(kv, options);
     }
 
